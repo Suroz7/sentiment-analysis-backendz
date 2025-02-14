@@ -1,8 +1,12 @@
+from fastapi import APIRouter
 from transformers import pipeline
 
-# Load sentiment analysis pipeline from Hugging Face
-sentiment_pipeline = pipeline("sentiment-analysis")
+router = APIRouter()
 
-def analyze_sentiment(text: str) -> dict:
-    result = sentiment_pipeline(text)[0]  # Get the first result
-    return {"label": result["label"], "score": result["score"]}
+# Use Hugging Face API instead of requiring local PyTorch/TensorFlow
+sentiment_pipeline = pipeline("sentiment-analysis", model="distilbert/distilbert-base-uncased-finetuned-sst-2-english", device=-1)
+
+@router.post("/analyze")
+async def analyze(text: str):
+    sentiment = sentiment_pipeline(text)
+    return sentiment
